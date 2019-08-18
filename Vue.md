@@ -289,3 +289,307 @@ vue-cli就是一个帮助我们快速构建基于Webpack打包构建项目的工
 
 **运行项目：npm run serve**
 
+
+
+#### eslint
+
+我们在项目中启用了eslint语法规范检测，往往为了代码能够满足这样的规范，我们可以这样处理
+
+1.安装一个插件：eslint
+
+2.添加用户设置：文件》首选项》设置>eslint > 打开setting.json文件
+
+3.在vs code 里面安装，装一次就行了
+
+配置代码：
+
+```vue
+{
+  "editor.fontSize": 20,
+  "liveServer.settings.donotShowInfoMsg": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "files.autoSave": "off",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "vue-html",
+    {
+      "language": "vue",
+      "autoFix": true
+    },
+    "html",
+    "vue"
+  ],
+  "eslint.autoFixOnSave": true,
+  // 需要 npm install -g eslint-plugin-vue
+  "eslint.options": {
+    "extensions": [
+      ".js",
+      ".vue"
+    ]
+  },
+  "explorer.confirmDragAndDrop": false,
+}
+```
+
+4.重启vs-code
+
+
+
+
+
+### 常见系统指令
+
+指令在vue开发过程中非常常用，可以说没有指定，你使得vue开发寸步难行
+
+
+
+#### 插值表达式
+
+- 作用：展示在data中定义的数据，
+
+- 表现形式：{{}}，只能写在标签之间，只能使用在双标签，它不能当成标签的属性来使用
+
+- 使用方式{{变量}}：这个变量必须先定义，一般在data函数中定义
+
+- 细节
+
+  ```vue
+  <div class="first">
+      <p>{{msg}}</p>
+      <!-- <p value='{{msg}}'></p> -->
+      <!-- 1.拼接 字符串 -->
+  	<p>{{msg + 'jack'}}</p>
+      <!-- 2.实现简单的运算-表达式 -->
+  	<p>{{age + 1}}</p>
+      <!-- 3.使用api -->
+  	<p>{{msg.toUpperCase().substr(1)}}</p>
+      <p>{{gender?'男':'女'}}</p>
+      <!-- 不能写js逻辑表达式 -->
+      <!-- <p>{{if(gender){'男'}else{'女'}}}</p> -->
+  </div>
+  ```
+
+  常见错误：
+
+  ![11-插值表达式](E:\前端笔记\images\11-插值表达式.png)
+
+
+
+#### v-text
+
+它的使用方式类似于属性的使用：v-text='定义好的变量名称'
+
+```vue
+<div class="text">
+        <p>这个文件描述v-text的使用</p>
+        <p>v-text的作用和插值类似，都是为双标签添加展示内容,但是v-text是将指定的属性完全的替换标签之间的内容，而不管标签之间有什么</p>
+        <hr>
+        <p>{{msg + 'aaa'}}</p>
+        <p v-text='msg'>{{name}}</p>
+        <!-- 使用细节 -->
+        <p v-text='msg+"你好"'></p>
+        <p v-text='msg.toUpperCase()'></p>
+        <p v-text='age + 1'></p>
+        <p v-text='age>18?"成年":"未成年"'></p>
+    </div>
+```
+
+
+
+
+
+#### v-html
+
+作用：可以解析html结构
+
+示例：
+
+```vue
+<div class="ht">
+        <p>这个文件描述v-html</p>
+        <p>v-html可以解析网页结构</p>
+        <p>{{content}}</p>
+        <p v-text='content'></p>
+        <p v-html='content'></p>
+    </div>
+```
+
+使用场景：以后可以接收从服务器返回的html结构代码并进行解析，在页面中展示
+
+
+
+#### v-bind(重点)
+
+它可以为属性动态绑定数据
+
+当以后你的属性会是变化的，那么就应该使用v-bind
+
+语法 ：< 标签  v-bind:属性=‘data中定义的变量’>
+
+示例：
+
+```vue
+<div class="bind">
+        <p>{{msg}}</p>
+        <!-- <img src="/assets/logo.png" alt=""> -->
+        <img v-bind:src="img" alt="">
+        <!-- <a v-bind:href="'/del?id='+id">删除</a> -->
+        <p>简写</p>
+        <a :href="'/del?id='+id">删除</a>
+        <p :[prop]='username'>动态绑定属性</p>
+        <p>下面的示例为元素动态绑定样式</p>
+        <p :class="{isRed:hasRed}">我是红色字</p>
+        <!-- 实现左侧展开和合并 -->
+        <button @click='isCollpse=!isCollpse'>单击展开和合并</button>
+        <div :class='{left:true,collpse:isCollpse}'></div>
+        <!-- <div :class="[classA, classB]"></div> -->
+        <p :class="[isred,isunder]">没写字</p>
+        <p :style='{fontSize:fontsize+"px"}'>难道大小是30？</p>
+    </div>
+```
+
+简写方式：< 标签  :属性=‘data中定义的变量’>
+
+有一个意识：任何属性都可以动态绑定
+
+
+
+#### v-for(重点)
+
+这个指令用于循环动态动态结构
+
+在vue中只有一种：v-for
+
+你想循环动态生成什么结构，就在这个结构中添加v-for
+
+- 语法：<标签 v-for='(value,index) in 遍历源'>
+- 遍历数组
+- 遍历对象
+- 细节说明
+
+```vue
+<template>
+    <div class="for">
+        <p>这个文件描述v-for的使用</p>
+        <!-- 遍历数组 -->
+        <p>对于数组，可以遍历出数组的value和index (值和索引)</p>
+        <p>:key:可以唯一标识当前数据行，后期的操作可以提高效率，这个值必须是唯一值</p>
+        <ul>
+            <li v-for='(value,index) in arr' :key='index'>{{value + ":"+ index}}</li>
+        </ul>
+        <!-- 遍历对象 -->
+        <p>对于对象，可以遍历出对象的value,key,index,(值，key,index)</p>
+        <div v-for='(v,k,i) in obj' :key='k'>{{k+":"+v+":"+i}}</div>
+        <!-- 遍历对象数组 -->
+        <table border="1" width='600px'>
+            <thead>
+                <th>姓名</th>
+                <th>年龄</th>
+                <th>性别</th>
+            </thead>
+            <tbody>
+                <tr v-for='(value,index) in userlist' :key='index'>
+                    <td>{{value.name}}</td>
+                    <td>{{value.age}}</td>
+                    <td>{{value.gender}}</td>
+                    <!-- <td v-for='(v,k) in value' :key='k'>{{v}}</td> -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      arr: [1, 3, 5, 7, 9, 11],
+      obj: {
+        name: 'jack',
+        age: 20,
+        gender: '男'
+      },
+      userlist: [
+        { name: 'jack',
+          age: 21,
+          gender: '男' },
+        { name: 'rose',
+          age: 18,
+          gender: '女',
+          subject: '大前端' },
+        { name: 'tom',
+          age: 19,
+          gender: '男' }
+      ]
+    }
+  }
+}
+</script>
+<style lang="less" scoped>
+
+</style>
+```
+
+
+
+
+
+#### v-model(重点)
+
+> 实现数据的双向绑定：
+>
+> 1.修改数据，页面中的展示自动变化
+>
+> 2.修改页面中的数据，data中的数据也会自动的变化
+
+- 语法： v-model='data中声明的成员'
+
+- 使用限制：只有input  ,textarea, select可以使用
+
+  ```vue
+  <template>
+      <div class="model">
+          <p>这个文件讲解v-model双向数据绑定</p>
+          <!-- v-model只支持：input select textarea -->
+          <!-- <p v-model='username'>aa</p> -->
+          <p>登陆</p>
+          用户名：<input type="text" v-model='loginForm.username'> <br>
+          密码：<input type="text" v-model="loginForm.userpass"> <br>
+          <input type="button" value="登陆" @click='login'>
+      </div>
+  </template>
+  <script>
+  export default {
+    data () {
+      return {
+      //   username: '',
+      //   userpass: ''
+        loginForm: {
+          username: 'jack',
+          userpass: '123456'
+        }
+      }
+    },
+    methods: {
+      login () {
+        console.log(this.loginForm)
+      }
+    }
+  }
+  </script>
+  <style lang="less" scoped>
+  
+  </style>
+  
+  ```
+
+  
+
+
+
+
+
+
+
+
+
