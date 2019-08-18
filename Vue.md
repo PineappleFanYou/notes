@@ -1,301 +1,154 @@
 
 
-### 什么是Vue.js
+### webpack
 
-- Vue.js 是目前最火的一个前端框架，React是最流行的一个前端框架（React除了开发网站，还可以开发手机App， Vue语法也是可以用于进行手机App开发的，需要借助于Weex）
-
-- Vue.js 是前端的**主流框架之一**，和Angular.js、React.js 一起，并成为前端三大主流框架！
-
-- Vue.js 是一套构建用户界面的框架，**只关注视图层**，它不仅易于上手，还便于与第三方库或既有项目整合。（Vue有配套的第三方类库，可以整合起来做大型项目的开发）
-
-- 前端的主要工作？主要负责MVC中的V这一层；主要工作就是和界面打交道，来制作前端页面效果；
-
-  #### 双向数据绑定的概念
-
-  定义：通过框架提供的指令，我们前端程序员只需要关心数据的业务逻辑，不再关心DOM是如何渲染的了
-
-  #### vue的核心概念
-
-  在Vue中，一个核心的概念，就是让用户不再操作DOM元素，解放了用户的双手，让程序员可以更多的时间去关注业务逻辑；
-
-  
-
-### 框架和库的区别
-
-框架：是一套完整的解决方案；对项目的侵入性较大，项目如果需要更换框架，则需要重新架构整个项目。
-
-比如：node 中的 express；
-
-库（插件）：提供某一个小功能，对项目的侵入性较小，如果某个库无法完成某些需求，可以很容易切换到其它库实现需求。
-
-比如：
-
-- 1. 从Jquery 切换到 Zepto
-- 2. 从 EJS 切换到 art-template
+> 最佳体验
+>
+> 安装webpack的时候，安装本地和全局
+>
+> npm init -y
+>
+> npm i webpack webpack-cli -g
+>
+> npm i webpack webpack-cli -S
 
 
 
+#### webpack体验
+
+- 安装
+
+  1.npm i webpack -S
+
+  2.npm i webpack-cli -S
+
+- 体验：使用Webpack进行打包转换
+
+1.输入命令：webpack 需要进行打包构建的源文件
+
+2.它会自动的将这个源文件打包构建放置到当前根目录下的dist文件夹中，并且生成一个名称为main.js的目标文件
+
+3.这个main.js就是浏览器可以识别的文件，意味着在index.html文件中应该引入main.js文件
+
+4.你指定了源文件进行打包构建，那么这还会同时打包构建这个源文件中引用的其它所有资源文件
+
+**5.命令：webpack 源文件****
 
 
 
+- 细节：mode设置
 
-### MVVM前端视图层分层开发思想
+  1.默认为product:产品阶段，会将生成的目标js文件进行压缩
 
-主要把每个页面，分成了M   V  和 VM ,其中，VM是MVVM思想核心，因为VM是M和V之间的调度者
-
-M：这里的M保存的是每个页面中单独的数据
-
-VM：它是一个调度者，分割了M和V。每当V层想要获取后保存数据的时候，都要有VM做中间的处理
-
-V：就是每个页面中的HTML结构
-
-前端页面中使用MVVM的思想，主要是为了让我们开发更加方便，因为MVVM提供了数据的双向绑定
-
-注意：数据的双向绑定是有VM提供的
-
-![1565492754538](C:\Users\87625\AppData\Roaming\Typora\typora-user-images\1565492754538.png)
+  2.设置mode:--mode=development：生成一个未压缩的源js文件
 
 
 
 
 
-### Vue指令
+#### webpack.config.js
 
-#### v-cloak/v-text/v-html
+这 个文件是webpack的核心配置文件，我们在这个文件中可以进行如下配置：
 
-v-cloak:
+1.入口
 
-cloak:隐藏  
+2.输出
 
-使用v-cloak能够解决 插值表达式闪烁的问题
+3.loader加载器
 
-```html
-<p v-cloak>+++{{ msg }}---good</p>
+4.plugin插件
+
+- 如何创建webpack.config.js：在当前项目根目录 创建，同时注意名称死都不能改
+- 如何配置入口
+- 如何配置输出
+
+```vue
+var path = require('path')
+// 进行webpack打包构建时的配置，它是一个配置对象
+// 这个配置以后需要引入之后才能使用:当然,不用我们自己引入,而是webpack自动引入的
+module.exports = {
+    // 入口:你想打包构建的源文件路径--相对路径
+    entry:'./src/app.js',
+    // 输出:指定将源文件打包构建放置到?个文件夹?个文件名称
+    output:{
+        // 这个路径从3.*版本开始,就需要是一个绝对路径
+        // 指定文件目录
+        path:path.join(__dirname, 'dist'),
+        // 指定文件名称
+        filename:'bundle.js'
+    }
+}
 ```
 
-v-text:
+享受配置成果：webpack:会将./src/app.js打包构建为bundle.js文件并存储在dist文件夹中，html页面就应该引入bundle.js文件
 
-v-text会覆盖元素中原本的内容
 
-```html
-<p v-text= msg1> ---good--- </p>
+
+#### webpack-dev-server--重点
+
+通过之前的配置，我们已经可以将指定的源文件打包构建为浏览器可以识别的文件，并正确的解析，但是我们发现一个问题：如果你修改了源代码，页面中并不能及时出现修改代码之后的结果：
+
+原因是你的目标文件并没有更新>>你没有重新打包构建，目标文件中的功能没有变化
+
+我们希望：修改源代码之后，自动的进行重新的打包构建，并是帮助我刷新浏览器
+
+
+
+webpack-dev-server的作用：
+
+安装：npm install webpack-dev-server --save-dev
+
+配置
+
+```vue
+// 配置dev-server
+devServer:{
+    // 设置你的托管资源的存放目录,同时这个目录提供外部的访问,默认会生成一个main.js
+    publicPath:'/dist'
+}
 ```
 
-v-html:
+享受成果
 
-v-html 会把里面的标签解析成html的标签也，会覆盖元素中原本的内容
+- 我们现在在页面中引入的资源不再是本地资源，而是服务器资源
+- 意味着本地已经看不到打包构建好的目标文件了，因为它已经被托管到服务器上
+- 在html页面中，我们可以以服务器资源的方式来请求目标文件
 
-```html
-<div v-html= msg2>{{ msg2 }}</div>
-```
-
-区别：
-
-插值表达式只会替换自己的这个占位符，不会把整个元素的内容清空
+补充：webpack-dev-server --open:它可以自动的打开浏览器
 
 
 
-#### v-bind
-
-v-bind 是 Vue中，提供的用于绑定属性的指令,可以合法的写js表达式
-
-```html
-<input type="button" value="按钮" v-bind:title="mytitle">
-```
-
-注意：v-bind 指令可以被简写为  :  要绑定的属性 也就是一个冒号
-
-```html
-<input type="button" value="哈哈" :title='mytitle1'>
-```
 
 
+#### webpack-css
 
-#### v-on
+让webpack能够支持css的解析处理
 
-Vue 中提供了 v-on：事件绑定机制
+经典错误：因为没有这种类型的文件的对应的loader
 
-Vue 中提供了 v-on：指令可以被简写为 @
+![webpack-css错误配置提示](E:\前端笔记\images\webpack-css错误配置提示.png)
 
-methods: 这个 methods属性中定义了当前的Vue实例所有可用的方法
+找到合适的loader:百度-webpack支持css（再去github取搜索配置）
 
-```html
-<input type="button" value="嘿嘿" v-on:click='show'>
-```
+下载安装：npm install css-loader style-loader --save-dev
 
-```js
- methods:{ //这个 methods属性中定义了当前的Vue实例所有可用的方法
-            show: function() {
-                alert('你好啊')
-            }
-```
+配置
 
-
-
-#### v-model 和 双向数据绑定
-
-使用 v-model 指令，可以实现表单元素和 Model 中数据的双向绑定
-
-注意：v-model 只能运用在 表单元素中 例如： input(radio,text,address,email...)  select  checkbox   textarea
-
-
-
-#### v-for 和 key 属性
-
-1.迭代数组
-
-```html
-<!-- 此时如果想拿到索引，用一个小括号包起来， item代表我们循环的每一项，i 代表索引，和我们以前的  数组.forEach((item,i) =>{})一样，里面传递一个回调函数的时候，传递一个参数就是代表每个元素，两个就代表一个元素，一个索引-->
-<p v-for="(item,i) in list">索引值是:{{ i }} ---- 每一项是:{{ item }}</p>
-```
-
-2.迭代对象
-
-```html
-<p v-for="(item,i) in list">id:{{item.id}}---名字:{{item.name}}---索引:{{i}}</p>
-```
-
-```js
-var vm = new Vue({
-        el:'#app',
-        data:{
-            list:[
-                {id:1, name:'光头强'},
-                {id:2, name:'熊大'},
-                {id:3, name:'熊二'},
-                {id:4, name:'熊三'},
-            ]
+```vue
+// 这个模块专门用于加载loader
+module: {
+    // 加载规则:什么类型的文件你要使用什么样的loader进行解析处理
+    rules: [
+        // 添加对css的支持
+        {
+            // 正则表达式:意味着后期以.css结尾的文件都会使用下面指定的loader来处理
+            test: /\.css$/i,
+            // css-loader:将css模块处理解析为浏览器可以识别的css代码
+            // style-loader:将解析过后的Css代码添加到页面中
+            // 加载loader是从右到左
+            use: ['style-loader', 'css-loader'],
         },
-        methods:{}
-    })
-```
-
-3.迭代对象中的属性
-
-```html
-<!-- 注意：在遍历对象身上的键值对的时候，除了 有 val key, 在第三个位置还有一个索引 -->
-        <p v-for="(val,key,i) in user">值:{{ val }}----键:{{ key }}---索引:{{ i }}</p>
-```
-
-```js
- var vm = new Vue({
-        el:'#app',
-        data:{
-            user: {
-                id:1,
-                name:'光头强',
-                gender:'男'
-            }
-        },
-        methods:{}
-    })
-```
-
-
-
-4迭代数字
-
-```html
-<!-- in 后面我们放过  普通数据  对象数组 对象 还可以放数字 -->
-         <!-- 注意：如果使用 v-for 迭代数字的话， 签名的 count 值从 1 开始 -->
-        <p v-for="count in 10">这是第{{ count }}次循环</p>
-```
-
-注意点：2.2.0+ 的版本里，**当在组件中使用** v-for 时，key 现在是必须的。
-
-
-
-当 Vue.js 用 v-for 正在更新已渲染过的元素列表时，它默认用 “**就地复用**” 策略。如果数据项的顺序被改变，Vue将**不是移动 DOM 元素来匹配数据项的顺序**， 而是**简单复用此处每个元素**，并且确保它在特定索引下显示已被渲染过的每个元素。
-
-
-
-为了给 Vue 一个提示，**以便它能跟踪每个节点的身份，从而重用和重新排序现有元素**，你需要为每项提供一个唯一 key 属性。
-
-
-
-#### 事件修饰符：
-
-.stop       阻止冒泡
-
-.prevent    阻止默认事件
-
-.capture    添加事件侦听器时使用事件捕获模式
-
-.self       只当事件在该元素本身（比如不是子元素）触发时触发回调
-
-.once       事件只触发一次
-
-
-
-
-
-### 在Vue中使用样式
-
-#### 使用class样式
-
-1.数组
-
-```html
-<h1 :class="['pink','italic']">我是光头强，我的名字非常大</h1>
-```
-
-2.数组中使用三元表达式
-
-```html
-<h1 :class="['pink','italic', flag?'active' : '']">我是光头强，我的名字非常大</h1>
-```
-
-3.数组中嵌套对象
-
-```html
-<h1 :class="['pink','italic', {'active':flag}]">我是光头强，我的名字非常大</h1>
-```
-
-4.直接使用对象
-
-```html
-<h1 :class="{ pink:true,thin:true,italic:true,active:false  }">我是光头强，我的名字非常大</h1>
-```
-
-
-
-#### 使用内联样式
-
-1.直接在元素上通过 `:style` 的形式，书写样式对象
-
-```
-<h1 :style="{ color:'pink','font-weight':200 }">我是熊大，俺是熊二，我们两只熊的名字很大</h1>
-```
-
-2.将样式对象，定义到 `data` 中，并直接引用到 `:style` 中
-
-在元素中，通过属性绑定的形式，将样式对象应用到元素中：
-
-```html
-<h1 :style="styleObj1">我是熊大，俺是熊二，我们两只熊的名字很大</h1>
-```
-
-```js
-在data上定义样式：
-data:{
-       styleObj1:{ color:'pink','font-weight':200 },
- }
-```
-
-3.在 `:style` 中通过数组，引用多个 `data` 上的样式对象
-
-在元素中，通过属性绑定的形式，将样式对象应用到元素中：
-
-```html
-<h1 :style="[styleObj1,styleObj2]">我是熊大，俺是熊二，我们两只熊的名字很大</h1>
-```
-
-在data上定义样式：
-
-```js
-data:{
-      styleObj1:{ color:'pink','font-weight':200 },
-      styleObj2:{ 'font-style':'italic' }
+    ],
 }
 ```
 
@@ -303,41 +156,136 @@ data:{
 
 
 
+#### webpack-less
+
+less:预处理器，用来更方便简洁高效的创建样式
+
+找到合适的less加载器
+
+下载安装:npm install less less-loader -S
+
+配置
+
+```vue
+// 添加对less的支持
+{
+    test: /\.less$/,
+        use: [{
+            loader: 'style-loader'
+        }, {
+            loader: 'css-loader'
+        }, {
+            loader: 'less-loader'
+        }]
+}
+```
 
 
 
 
 
+#### webpack-图片&字体
+
+下载安装：npm install file-loader url-loader --save-dev
+
+配置：
+
+```js
+ // 添加对图片和图标的支持
+{
+    // png|jpg|gif:常见的图片资源
+    // eot|svg|ttf|woff:字体图标或web字体的字体源文件
+    test: /\.(png|jpg|gif|eot|svg|ttf|woff)/,
+        use: [{
+            loader: 'url-loader',
+            options: {
+                // limit表示如果图片大于50000byte，就以路径形式展示，小于的话就用base64格式展示
+                limit: 5000
+            }
+        }]
+}
+```
 
 
 
 
 
+#### webpack-babel
+
+可以将ES6转换为ES5，以便让浏览器能够支持我们所创建的代码
+
+一些低版本的浏览器不支持
 
 
 
 
 
+#### html-webpack-plugin
+
+它可以自动的将打包构建好的js文件引入到html文件中
+
+它甚至还可以自动的生成模板文件(*.html)
+
+下载安装：npm i --save-dev html-webpack-plugin
+
+配置
+
+```vue
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+--------------------------------------------------------
+plugins: [
+    new HtmlWebpackPlugin({
+        // 指定模板源文件
+        template:'index111.html',
+        // 将模板文件打包构建为目标文件
+        filename:'index.html',
+        // 指定js文件的插入位置
+        inject:'head'
+    })
+]
+```
+
+细节：这个插件与webpack-dev-server冲突。如果想要这个插件起作用就要注释到dev-server的配置
 
 
 
+#### vue-cli
 
+我们以后搭建一个基于Webpack的项目，需要先进行webpack配置，手动配置太繁琐
 
+vue-cli就是一个帮助我们快速构建基于Webpack打包构建项目的工具，通过vue-cli可以快速的生成基于webpack的项目，意味着大量的配置不用你自己手动实现，因为这个工具已经为你生成好了
 
+**使用过程**
 
+下载安装：npm install -g @vue/cli
 
+创建项目：vue create 项目名称
 
+通过箭头切换选项，通过空格来确认选择，通过enter来确认到下一步
 
+第一步：选择 CSS Pre-processors  记住：用空格先确定，前面会出现 * 号，就表示选中了，再按enter
 
+![06-cli-1](E:\前端笔记\images\06-cli-1.png)
 
+第二步：选择Less 预处理器
 
+![07-cli-2](E:\前端笔记\images\07-cli-2.png)
 
+第三步：选择eslint的配置
 
+![08-cli-3](E:\前端笔记\images\08-cli-3.png)
 
+第四步：选择默认，下一步
 
+![09-cli-4](E:\前端笔记\images\09-cli-4.png)
 
+第五步：选择第一个
 
+![10-cli-5](E:\前端笔记\images\10-cli-5.png)
 
+完成之后：可以看到结构
 
+![23-cli项目结构](E:\前端笔记\images\23-cli项目结构.png)
 
+**运行项目：npm run serve**
 
