@@ -583,7 +583,172 @@ export default {
   
   ```
 
-  
+  使用场景：表单元素的数据默认展示，收集表单数据
+
+
+
+#### v-on(重点)
+
+为元素绑定事件
+
+语法：v-on:事件名称=“事件处理函数(参数)”
+
+如何添加事件处理函数
+
+1.定义事件处理函数的位置：methods属性
+
+2.methods是一个单独的成员
+
+
+
+**为什么事件处理函数需要在methods中添加****
+
+1.这个结构中的this是指向当前组件对象
+
+2.理论上讲，你也可以在data中定义，但是这里面的this指向null/window
+
+3.data中只定义数据，不定义功能行为
+
+
+
+**如何去传递事件参数**
+
+1.如果你没有传递事件源对象，那么它也会默认的传递事件源对象
+
+2.如果传递自定义参数，那么默认的事件源对象就不现传递啦
+
+3.但是，如果传递自定义参数的同时，需要事件源对象，那么就需要手动传递$event
+
+示例：
+
+```vue
+<button v-on:click='dosome("jack",$event)'>点我啊</button>
+---------------------------------------------------------
+methods: {
+    dosome (name, event) {
+      //   console.log('谢谢你点我')
+      console.log(name)
+      console.log(event)
+    }
+  }
+```
+
+简写：@
+
+```vue
+<button @click='dosome("jack",$event)'>点我啊</button>
+```
+
+
+
+**事件修饰符：**
+
+1.prevent:阻止元素的默认行为
+
+2.enter/13:键码和键别名
+
+3.once:只触发一次
+
+4.native:为组件的根元素添加原生事件
+
+示例：
+
+```vue
+<div class="on">
+    <p>这个文件用来说明v-on绑定事件</p>
+    <p>{{msg}}</p>
+    <!-- v-on:事件名称=“事件处理函数(参数)” -->
+    <button v-on:click='dosome("jack",$event)'>点我啊</button>
+    <button v-on:[type]='dothis'>你自由</button>
+    <button @click='dosome("jack",$event)'>点我啊</button>
+    <a href="http://baidu.com" @click.prevent.stop='sayHi'>单击我向你问好</a>
+    <!-- <input type="text" v-model="key" @keydown.enter="showmsg"> -->
+    <input type="text" v-model="key" @keydown.13="showmsg">
+    <button @click.once='onceDo'>点我啊，只有一次机会</button>
+    <button @click.once='key=123'>点我啊，只有一次机会</button>
+</div>
+```
+
+
+
+#### v-if和v-show
+
+这两个指令都能实现元素的显示和隐藏
+
+语法：v-if='bool值'    v-show='bool值'
+
+使用细节
+
+1.v-if:是通过是否创建元素来决定元素是显示还是隐藏
+
+2.v-show是通过样式的方式来决定元素是显示还是隐藏
+
+**使用场景**
+
+1.如果一个元素频繁的显示和隐藏，那么就使用v-show--可以节省创建元素的过程
+
+2.如果元素的显示涉及到异步操作，就使用v-if--可以避免无用的数据占据内存空间
+
+代码示例
+
+```vue
+<div class="show">
+    <button @click="isShow = !isShow">单击切换显示隐藏</button>
+    <p>这个文件主要讲解v-if和v-show实现元素的显示隐藏</p>
+    <p>对于我们而言重要是掌握这两种方式实现显示隐藏的区别</p>
+    <p v-if='isShow'>被控制的内容</p>
+    <p v-show='isShow'>被控制的内容</p>
+</div>
+```
+
+
+
+#### v-if和v-else-if和v-else
+
+可以实现条件判断分支语句
+
+细节：v-else-if 前面必须有v-if,v-else前面必须有v-if或v-else-if
+
+示例：
+
+```vue
+<div class="score">
+    <input type="number" v-model='score'>
+	<p>这个案例使用v-if来实现成绩的展示</p>
+    <p v-if='score>=90'>A</p>
+    <p v-else-if='score>=80'>B</p>
+    <p v-else-if='score>=70'>C</p>
+    <p v-else-if='score>=60'>D</p>
+    <p v-else>E</p>
+</div>
+```
+
+
+
+#### v-cloak
+
+v-cloak指令保持在元素上直到关联实例结束编译后自动移除，v-cloak和 CSS 规则如 [v-cloak] { display: none } 一起用时，这个指令可以隐藏未编译的 Mustache 标签直到实例准备完毕。
+通常用来防止{{}}表达式闪烁问题
+
+示例：
+
+```vue
+<style>
+    [v-cloak] {
+        display: none;
+    }
+</style>
+-----------------
+<p v-cloak>{{msg}}</p>
+```
+
+
+
+
+
+
+
+
 
 
 
