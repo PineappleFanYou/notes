@@ -1,4 +1,7 @@
-
+- 下载animate.css动画库
+- 将元素包裹在transition组件中
+- 按需要为元素添加六个时机所对应的样式名称
+  - 使用animated的时候，一定要先指定animated,再指定你想添加的动画样式名称
 
 ### webpack
 
@@ -741,6 +744,726 @@ v-cloak指令保持在元素上直到关联实例结束编译后自动移除，v
 -----------------
 <p v-cloak>{{msg}}</p>
 ```
+
+
+
+### 案例：列表数据展示案例
+
+目的:目的是为了回顾我们之前所学习过的指令，熟悉vue的写法
+
+#### 数据的动态展示
+
+##### 准备数据--自定义数据--对象数组
+
+```vue
+brandList: [
+    {
+        id: '1',
+        bname: '大众',
+        time: new Date()
+    },
+    {
+        id: '2',
+        bname: 'QQ',
+        time: new Date()
+    },
+    {
+        id: '3',
+        bname: '比亚迪',
+        time: new Date()
+    }
+]
+```
+
+##### 使用v-for实现动态结构的生成
+
+1.你想循环生成什么结构，就在这个结构中写v-for
+
+2.语法 ：v-for="(value,index) in brandList" :key='index'
+
+```vue
+<tr v-for='(value,index) in brandList' :key='index'>
+    <td>{{value.id}}</td>
+    <td>{{value.bname}}</td>
+    <td>{{value.time}}</td>
+    <td>
+        <a href="#">删除</a>
+    </td>
+</tr>
+```
+
+
+
+#### 实现数据的添加
+
+以前的做法：获取数据，添加数据到数组，实现页面的刷新
+
+现在的做法：实现数据的双向绑定，添加数据到数组，修改了数据源页面就会及时刷新
+
+过程
+
+定义数据对象，实现双向绑定
+
+```vue
+brand: {
+    id: '',
+    bname: ''
+}
+----------------------------------
+编号:<input type="text" v-model="brand.id"/>
+品牌名称:<input type="text"  v-model="brand.bname"/>
+```
+
+“”添加按钮“事件绑定
+
+```vue
+<input type="button" value="添加" @click='add'/>
+```
+
+添加事件处理函数：methods
+
+1.设置time属性
+
+2.将数据添加到数组
+
+```vue
+methods: {
+    //   添加
+    add () {
+       this.brand.time = new Date()
+      //   展开运算符的使用：将对象展开为一个一个成员，再生成一个完整的对象，添加到数组。这里使用展开运算符实现对象的深拷贝
+      this.brandList.push({ ...this.brand })
+    }
+}
+```
+
+
+
+#### 实现数据的删除
+
+1.添加单击事件
+
+2.在事件绑定的时候，需要传递索引做为参数
+
+```vue
+<a href="#" @click.prevent='del(index)'>删除</a>
+```
+
+3.在事件处理函数中使用splice进行数组成员的删除
+
+```vue
+// 删除
+del (index) {
+    this.brandList.splice(index, 1)
+}
+```
+
+4.如果删除所有数据之后，应该给出用户提示
+
+```vue
+<tr>
+    <td colspan="4" v-show='brandList.length == 0'>没有任何数据，请先添加</td>
+</tr>
+```
+
+
+
+### vue中的钩子函数
+
+钩子函数就是指vue组件的生命周期函数
+
+1.钩子函数：就是满足条件就会自动触发的函数
+
+2.组件加载完成之后自动触发的函数：mounted(){}
+
+
+
+### vue中如何操作dom
+
+1.为dom元素设置ref标识,这个标识类似于id标识，它应该是唯一的
+
+2.统一通过    this.$refs.dom元素的ref值   进行元素的获取
+
+
+
+### 全局自定义指令
+
+在组件外创建的指令
+
+1.创建一个单独的文件进行指令的封装
+
+```vue
+// 如果没有标识为default,那么就是一个常规的对象
+export const myfocus = {
+  inserted (el) {
+    el.focus()
+  }
+}
+---------------------------
+export const mycolor = {
+  inserted (el, binding) {
+    // binding.value:就是你使用指令时为指令所绑定的数据
+    el.style.color = binding.value
+  }
+}
+```
+
+2.在需要使用这个指令的单文件组件中引入这个指令
+
+```vue
+import { myfocus,mycolor } from '@/tools/userDirectives.js' // 对象的解构
+```
+
+3.进行指令的注册
+
+```vue
+// 实现指令的注册
+directives: {
+    myfocus,mycolor
+}
+```
+
+4.使用这个指令
+
+```html
+<input type="text" v-model="brand.bname" ref="myname" v-myfocus  />
+```
+
+
+
+### 局部自定义指令
+
+定义:在组件内部通过directives来创建的指令
+
+#### 第一种：无参指令
+
+1.语法
+
+```vue
+directives:{
+    指令名称：{
+        // 配置
+        // el:当前添加这个指令的元素
+        // binding:它是一个对象，里面就包含着当前使用指令时的相关的状态
+        inserted(el,binding,vNode.oldNode){
+            // 实现指令的功能
+        }
+    }
+}
+```
+
+2.创建局部指令
+
+```vue
+directives: {
+    myfocus: {
+        //  当指令添加到dom元素时触发
+        // el:  指令所绑定的元素，可以用来直接操作 DOM:说白了：谁引入了这个指令谁就是el
+        inserted (el) {
+            //   让元素聚焦
+            el.focus()
+        }
+    }
+}
+```
+
+3.使用局部指令：
+
+在元素中，通过 v-指令名称 来使用自定义指令
+
+```html
+<input type="text" v-model="brand.bname" ref="myname" v-myfocus  />
+```
+
+
+
+#### 第二种：带参指令
+
+1.语法：没有区别
+
+2.创建：
+
+```js
+// 再来创建一个设置颜色的指令
+mycolor: {
+    inserted (el, binding) {
+        // binding.value:就是你使用指令时为指令所绑定的数据
+        el.style.color = binding.value
+        console.log(binding)
+    }
+}
+```
+
+3.使用
+
+```js
+// 先定义变量
+usercolor: 'blue'
+// 使用指令 
+<input type="text" v-model="brand.bname" ref="myname" v-myfocus v-mycolor='"red"' />
+```
+
+
+
+### 过滤器
+
+定义：对数据进行过滤处理，返回你想要的结果
+
+
+
+#### 局部自定义过滤器
+
+1.通过在组件内部使用filters来创建局部过滤器
+
+2.语法 
+
+```js
+filters:{
+    过滤器名称：function(默认参数,自定义参数.....){
+        // 业务处理
+        return 处理结果
+    }
+}
+```
+
+3.创建过滤器
+
+```vue
+filters: {
+    timeFormat: function (time, spe) {
+      console.log(time, spe)
+      // 具体的业务处理
+      let year = time.getFullYear()
+      let month = time.getMonth() + 1
+      let day = time.getDate()
+      return year + spe + month + spe + day
+    }
+  }
+```
+
+4.使用过滤器
+
+在需要过滤器的位置使用管道符来添加过滤器的使用
+
+管道符：|
+
+语法 ：源数据  |  过滤器函数
+
+关于过滤器参数传递的说明
+
+1.如果没有传递参数：就会默认的传递管道符前面的数据
+
+2.如果我手动传递的自定义参数，也不会影响默认参数的传递，默认参数永远在参数列表的第一位
+
+```html
+<td>{{value.time | timeFormat('-')}}</td>
+```
+
+
+
+#### 全局自定义过滤器
+
+1.封装一个文件
+
+2.定义全局过滤器
+
+```vue
+export const timeFormat = (time, spe) => {
+  let year = time.getFullYear()
+  let month = time.getMonth() + 1
+  let day = time.getDate()
+  return year + spe + month + spe + day
+}
+```
+
+3.使用
+
+引入
+
+```vue
+import { timeFormat } from '@/tools/userFilters.js'
+```
+
+注册
+
+```vue
+filters: {
+    timeFormat
+}
+```
+
+使用
+
+```vue
+<td>{{value.time | timeFormat('/')}}</td>
+```
+
+
+
+
+
+### 计算属性和侦听器
+
+#### 计算属性
+
+##### 为什么要使用计算属性
+
+1.{{  花括号 }} 本质的目的是用于展示数据--输出表达式
+
+2.不建议在里面创建复杂的业务逻辑，否则会降低代码的可读性，同时如果多个场合这样使用，不利于后期的修改和维护
+
+3.这种场景建议使用计算属性
+
+##### 功能
+
+1.实现复杂的业务逻辑--计算
+
+**2.实现数据的监听，可以监听数据的变化：只要你的计算属性中使用到了this的成员，那么当this的这个成员发生变化的时候，就会自动的触发计算属性**
+
+3.his.***：依赖项
+
+##### 定义计算属性
+
+1.通过computed:{}定义计算属性
+
+2.计算属性是一个单独的成员
+
+**3.计算属性看上去是一个函数，但是要按属性的方式来使用，简单说，就是你定义了计算属性之后，可以像使用data中的成员一样来使用计算属性**
+
+```vue
+joinName () {
+      return this.firstname.substr(0, 1).toUpperCase() + this.firstname.substr(1) + ':' + this.secondname.substr(0, 1).toUpperCase() + this.secondname.substr(1)
+    }
+```
+
+##### 用计算属性实现数据的筛选
+
+1.添加用户搜索关键字，并实现双向绑定
+
+2.添加计算属性
+
+```vue
+// 添加计算属性
+computed: {
+    search () {
+        // 使用数组的filter函数来实现数据的筛选
+        // 实现数据的筛选
+        var arr = []
+        for (var i = 0; i < this.brandList.length; i++) {
+            if (this.brandList[i].bname.indexOf(this.userkey) !== -1) {
+                arr.push(this.brandList[i])
+            }
+        }
+        return arr
+    }
+}
+```
+
+3.修改v-for循环数据源
+
+```vue
+<tr v-for="(value,index) in search" :key="index">
+    <td>{{value.id}}</td>
+    <td>{{value.bname}}</td>
+    <td>{{value.time | timeFormat('/')}}</td>
+    <td>
+        <a href="#" @click.prevent="del(index)">删除</a>
+    </td>
+</tr>
+```
+
+##### 计算属性和函数的区别
+
+1.**计算属性是基于它们的响应式依赖进行缓存的**：只有计算属性的依赖项发生变化才会重新的执行计算属性，否则会使用上一次计算结果
+
+2.该方法没有缓存的功能，只要你调用就会重新执行
+
+##### 计算属性的重大限制：
+
+它对异步操作无法响应，意味着它无法监听异步操作时的依赖项的数据变化
+
+
+
+#### 侦听器-watch
+
+1.侦听器中的函数的名称必须与你要侦听的属性名称完全一致，说白了，你要侦听哪个属性的变化，就在watch定义一个与属性名称同名的函数
+
+2.侦听器与计算属性在使用时有一个重大 的区别：计算属性需要人为调用，侦听器不能调用，它是自动触发的
+
+3.当侦听器所侦听的属性值发生变化的时候，就会自动的调用对应的侦听器函数
+
+
+
+##### 普通侦听
+
+参数说明：oldvalue，newvalue
+
+
+
+##### 深度侦听
+
+1.如果你修改了一个对象的属性值，并没有修改对象本身，因为对象是一个地址，意味着侦听器如果像普通侦听一样添加，并不会自动触发，说明普通侦听并不能侦听对象的属性值的变化
+
+2.如果想侦听对象的属性值变化，就需要使用深度侦听
+
+
+
+**侦听方式：**
+
+第一种：常规方式
+
+1.在侦听 器中添加handler函数
+
+2.设置deep属性为true
+
+3.特点：那么任何一个属性值的变化都会触发
+
+```vue
+watch: {
+    // 常规方式
+    currentUser: {
+        handler (newV, oldV) {
+            console.log(newV.name, oldV.name)
+        },
+        deep: true
+    }
+}
+```
+
+
+
+常用方式--指定你想侦听的属性
+
+```vue
+'currentUser.name' (newV, oldV) {
+    console.log(newV)
+}
+```
+
+
+
+### 添加过渡动画
+
+1.什么情况下我们才会考虑添加过渡动画?
+
+为元素添加v-if 或  v-show
+
+2.**如何添加过滤动画效果**
+
+1.将你想添加过渡动画的元素添加到transition组件中
+
+2.为transition设置name属性， 这个name属性就是后期状态样式的前缀，如果没有这个name属性，那么会造成所有添加过渡效果的元素共用同一个样式
+
+3.添加不同状态时的样式，它一共有6种状态
+
+![12-transition的六个时机](E:\前端笔记\images\12-transition的六个时机.png)
+
+1.v-enter:准备进入(显示)
+
+2.v-enter-active:进入过程，显示过程
+
+3.v-enter-to:进入完毕，显示完毕
+
+4.v-leave:准备离开
+
+5.v-leave-active:离开过程
+
+6.v-leave-to:离开完毕
+
+示例
+
+包裹元素，设置name属性
+
+```vue
+ <transition name='move'>
+     <p v-show='isShow'>我是被操作的元素</p>
+</transition>
+```
+
+添加六种状态所对应的样式，这结样式在合适的时机会自动的添加到元素
+
+```vue
+<style scoped>
+/* 3.添加六个时机的样式 */
+/* v-enter v-enter-active  v-enter-to */
+.move-enter{
+    margin-left:200px;
+    opacity: 0;
+}
+.move-enter-active{
+    transition:all 1s;
+}
+.move-enter-to{
+    margin-left:0px;
+    opacity: 1;
+}
+/* v-leave v-leave-active  v-leave-to */
+.move-leave{
+    margin-left:0px;
+    opacity: 1;
+}
+.move-leave-active{
+    transition:all 1s;
+}
+.move-leave-to{
+    margin-left:200px;
+    opacity: 0;
+}
+```
+
+
+
+#### 使用第三方css库实现过渡动画(这个要掌握)
+
+使用类样式添加过渡动画
+
+1.之前：自定义过渡的样式--写代码
+
+2.现在：自定义过渡的类名--调用样式
+
+**六个时机**
+
+- v-enter>>enter-class
+
+- v-enter-active:enter-active-class
+
+- v-enter-to:enter-to-class
+
+- v-leave:leave-class
+
+- v-leave-active:leave-active-class
+
+- v-leave-to:leave-to-class
+
+  **添加过程**
+
+  - 下载animate.css动画库
+  - 将元素包裹在transition组件中
+  - 按需要为元素添加六个时机所对应的样式名称
+    - 使用animated的时候，一定要先指定animated,再指定你想添加的动画样式名称
+
+示例
+
+```vue
+// main.js文件中
+import '@/styles/animate.css'
+----------------------------
+// 单文件组件中
+<transition
+            enter-active-class="animated slideInRight"
+            leave-active-class="animated slideOutRight">
+    <p v-show='isShow' class="my">我是被操作的元素</p>
+</transition>
+```
+
+
+
+#### 使用钩子函数实现过渡动画
+
+六个时机所对应的钩子函数：
+
+```vue
+  v-on:before-enter="beforeEnter" >> v-enter
+  v-on:enter="enter" >> v-enter-active
+  v-on:after-enter="afterEnter" >> v-enter-to
+
+  v-on:before-leave="beforeLeave" >> v-leave
+  v-on:leave="leave" >> v-leave-active
+  v-on:after-leave="afterLeave" >> v-leave-to
+```
+
+##### 添加对应的事件处理函数
+
+```vue
+beforeEnter: function (el) {
+      el.style.marginLeft = '200px'
+    },
+    // 当与 CSS 结合使用时
+    // 回调函数 done 是可选的
+    // el:就是指当前添加过渡动画效果的元素
+    enter: function (el, done) {
+      console.log(1)
+      let dis = 200
+      let timeid = setInterval(() => {
+        dis--
+        el.style.marginLeft = dis + 'px'
+        if (dis === 0) {
+          clearInterval(timeid)
+          done()
+        }
+      }, 1)
+    },
+    afterEnter: function (el) {
+      el.style.marginLeft = '0px'
+    }
+```
+
+
+
+### axios(重点，必须掌握，而且要熟练)
+
+axios就相当于ajax,我们在vue中使用Axios进行异步请求，向服务器获取数据
+
+Axios 是一个基于 promise 的 HTTP（基于http协议） 库
+
+
+
+#### promise
+
+1.它可以用来解决回调地狱
+
+2.Promise是一个构造函数
+
+使用过程
+
+1.创建一个对象
+
+2.调用then和catch方法
+
+```vue
+function createPromise (filename) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(`../data/${filename}`, 'utf-8', (err, data) => {
+      if (err) {
+        // 调用失败的回调
+        reject(err)
+      } else {
+        // 调用成功的回调
+        resolve(data)
+      }
+    })
+  })
+}
+
+var p1 = createPromise('1.txt')
+var p2 = createPromise('2.txt')
+var p3 = createPromise('3.txt')
+
+// 调用 promise对象,promise通过.then或.catch进行调用
+p1
+  .then((data) => {
+    console.log(data)
+    // 返回一个promise对象
+    return p2
+  })
+  .then((data) => {
+    console.log(data)
+    // 返回一个promise对象
+    return p3
+  })
+  .then((data) => {
+    console.log(data)
+  })
+  .catch((err) => {
+    console.log(err)
+  })
+```
+
+
+
+
+
+
 
 
 
